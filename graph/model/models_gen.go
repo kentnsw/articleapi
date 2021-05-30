@@ -2,18 +2,22 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Article struct {
-	ID    string   `json:"id"`
-	Title string   `json:"title"`
-	Date  string   `json:"date"`
-	Body  string   `json:"body"`
-	Tags  []string `json:"tags"`
+	ID    string    `json:"id"`
+	Title string    `json:"title"`
+	Date  time.Time `json:"date"`
+	Body  string    `json:"body"`
+	Tags  []string  `json:"tags"`
 }
 
 type ArticleFilter struct {
-	Tag   string  `json:"tag"`
-	Date  *string `json:"date"`
-	Limit *int    `json:"limit"`
+	Tag   string     `json:"tag"`
+	Date  *time.Time `json:"date"`
+	Limit *int       `json:"limit"`
 }
 
 type ArticlesByTag struct {
@@ -24,8 +28,8 @@ type ArticlesByTag struct {
 }
 
 type NewArticle struct {
-	Title string   `json:"title"`
-	Date  string   `json:"date"`
-	Body  string   `json:"body"`
-	Tags  []string `json:"tags"`
+	Title string    `json:"title"`
+	Date  time.Time `json:"date"`
+	Body  string    `json:"body"`
+	Tags  []string  `json:"tags"`
 }

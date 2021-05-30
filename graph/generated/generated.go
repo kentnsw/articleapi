@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -266,7 +267,7 @@ var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: `type Article {
   id: ID!
   title: String!
-  date: String!
+  date: Date!
   body: String!
   tags: [String!]!
 }
@@ -290,16 +291,18 @@ type ArticlesByTag {
 
 input ArticleFilter {
   tag: String!
-  date: String
+  date: Date
   limit: Int
 }
 
 input NewArticle {
   title: String!
-  date: String!
+  date: Date!
   body: String!
   tags: [String!]!
 }
+
+scalar Date
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -506,9 +509,9 @@ func (ec *executionContext) _Article_date(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNDate2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Article_body(ctx context.Context, field graphql.CollectedField, obj *model.Article) (ret graphql.Marshaler) {
@@ -2055,7 +2058,7 @@ func (ec *executionContext) unmarshalInputArticleFilter(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
-			it.Date, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Date, err = ec.unmarshalODate2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2091,7 +2094,7 @@ func (ec *executionContext) unmarshalInputNewArticle(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
-			it.Date, err = ec.unmarshalNString2string(ctx, v)
+			it.Date, err = ec.unmarshalNDate2timeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2644,6 +2647,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNDate2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	res, err := model.UnmarshalDate(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDate2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	res := model.MarshalDate(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2982,6 +3000,21 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) unmarshalODate2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := model.UnmarshalDate(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODate2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return model.MarshalDate(*v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {

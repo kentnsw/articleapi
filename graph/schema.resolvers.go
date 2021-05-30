@@ -11,13 +11,14 @@ import (
 	"github.com/kentnsw/artical-api/graph/generated"
 	"github.com/kentnsw/artical-api/graph/model"
 	articleStore "github.com/kentnsw/artical-api/storage/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *mutationResolver) CreateArticle(ctx context.Context, article model.NewArticle) (*model.Article, error) {
 	log.Println("CreateArticle() with ", article)
 	art := articleStore.Article{
 		Title: article.Title,
-		Date:  article.Date,
+		Date:  primitive.NewDateTimeFromTime(article.Date),
 		Body:  article.Body,
 		Tags:  article.Tags,
 	}
@@ -28,7 +29,7 @@ func (r *mutationResolver) CreateArticle(ctx context.Context, article model.NewA
 	return &model.Article{
 		ID:    art.ID.Hex(),
 		Title: art.Title,
-		Date:  art.Date,
+		Date:  art.Date.Time(),
 		Body:  art.Body,
 		Tags:  art.Tags,
 	}, nil
@@ -45,7 +46,7 @@ func (r *queryResolver) Article(ctx context.Context, id string) (*model.Article,
 	return &model.Article{
 		ID:    art.ID.Hex(),
 		Title: art.Title,
-		Date:  art.Date,
+		Date:  art.Date.Time(),
 		Body:  art.Body,
 		Tags:  art.Tags,
 	}, nil
@@ -65,7 +66,7 @@ func (r *queryResolver) Articles(ctx context.Context) ([]*model.Article, error) 
 		gqlArt := model.Article{
 			ID:    art.ID.Hex(),
 			Title: art.Title,
-			Date:  art.Date,
+			Date:  art.Date.Time(),
 			Body:  art.Body,
 			Tags:  art.Tags,
 		}
@@ -81,7 +82,7 @@ func (r *queryResolver) ArticlesByTag(ctx context.Context, filter model.ArticleF
 	log.Println("ArticlesByTag() with filter ", filter)
 	artFilter := &articleStore.Filter{Tags: filter.Tag}
 	if filter.Date != nil {
-		artFilter.Date = *filter.Date
+		artFilter.Date = primitive.NewDateTimeFromTime(*filter.Date)
 	}
 	if filter.Limit == nil {
 		filter.Limit = &default_limit

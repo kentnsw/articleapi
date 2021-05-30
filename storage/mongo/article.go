@@ -14,14 +14,14 @@ import (
 type Article struct {
 	ID    primitive.ObjectID `bson:"_id,omitempty"`
 	Title string
-	Date  string
+	Date  primitive.DateTime
 	Body  string
 	Tags  []string
 }
 
 type Filter struct {
 	ID    primitive.ObjectID `bson:"_id,omitempty"`
-	Date  string             `bson:"date,omitempty"`
+	Date  primitive.DateTime `bson:"date,omitempty"`
 	Tags  string             `bson:"tags,omitempty"`
 	Limit int64              `bson:"-"`
 }
@@ -67,6 +67,7 @@ func Find(ctx context.Context, f *Filter) ([]Article, error) {
 	var arts []Article
 	opt := options.Find()
 	opt.SetLimit(f.Limit)
+	opt.SetSort(bson.M{"_id": -1})
 
 	cursor, err := ArticleCollection.Find(ctx, f, opt)
 	if err != nil {

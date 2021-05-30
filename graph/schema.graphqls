@@ -1,7 +1,7 @@
 type Article {
   id: ID!
   title: String!
-  date: String!
+  date: Date!
   body: String!
   tags: [String!]!
 }
@@ -25,13 +25,15 @@ type ArticlesByTag {
 
 input ArticleFilter {
   tag: String!
-  date: String
+  date: Date
   limit: Int
 }
 
 input NewArticle {
   title: String!
-  date: String!
+  date: Date!
   body: String!
   tags: [String!]!
 }
+
+scalar Date
