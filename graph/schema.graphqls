@@ -1,0 +1,37 @@
+type Article {
+  id: ID!
+  title: String!
+  date: String!
+  body: String!
+  tags: [String!]!
+}
+
+type Query {
+  article(id: String!): Article
+  articles: [Article!]!
+  articlesByTag(filter: ArticleFilter!): ArticlesByTag!
+}
+
+type Mutation {
+  createArticle(article: NewArticle!): Article!
+}
+
+type ArticlesByTag {
+  tag: String!
+  count: Int!
+  articles: [String!]!
+  related_tags: [String!]!
+}
+
+input ArticleFilter {
+  tag: String!
+  date: String
+  limit: Int
+}
+
+input NewArticle {
+  title: String!
+  date: String!
+  body: String!
+  tags: [String!]!
+}
