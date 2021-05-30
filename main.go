@@ -9,7 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/kentnsw/artical-api/graph"
 	"github.com/kentnsw/artical-api/graph/generated"
-	articleStore "github.com/kentnsw/artical-api/storage/mongo"
+	store "github.com/kentnsw/artical-api/storage/mongo"
 )
 
 const defaultPort = "8080"
@@ -25,8 +25,8 @@ func main() {
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	articleStore.Connect()
-	defer articleStore.Disconnect()
+	store.Connect("mongodb://article-mongo/?retryWrites=true&writeConcern=majority")
+	defer store.Disconnect()
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

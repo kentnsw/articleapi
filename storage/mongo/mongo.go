@@ -17,9 +17,7 @@ var ArticleCollection *mongo.Collection
 const ARTICLE_DB_NAME = "articledb"
 const ARTICLE_COLLECTION_NAME = "articles"
 
-func Connect() *mongo.Client {
-	const uri = "mongodb://localhost/?retryWrites=true&writeConcern=majority"
-
+func Connect(uri string) *mongo.Client {
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
