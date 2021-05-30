@@ -40,6 +40,19 @@ func (article *Article) Save() (id string, err error) {
 	return article.ID.Hex(), nil
 }
 
+func InsertMany(ctx context.Context, arts []*Article) (count int, err error) {
+	var artsInterface []interface{} = make([]interface{}, len(arts))
+	for i, a := range arts {
+		artsInterface[i] = a
+	}
+	res, err := ArticleCollection.InsertMany(ctx, artsInterface)
+	if err != nil {
+		log.Fatal(err)
+		return 0, err
+	}
+	return len(res.InsertedIDs), nil
+}
+
 func FindById(ctx context.Context, id string) (Article, error) {
 	var art Article
 	artId, err := primitive.ObjectIDFromHex(id)

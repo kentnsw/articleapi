@@ -6,71 +6,53 @@ package graph
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/kentnsw/artical-api/graph/generated"
 	"github.com/kentnsw/artical-api/graph/model"
-	articleStore "github.com/kentnsw/artical-api/storage/mongo"
+	store "github.com/kentnsw/artical-api/storage/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *mutationResolver) CreateArticle(ctx context.Context, article model.NewArticle) (*model.Article, error) {
 	log.Println("CreateArticle() with ", article)
-	art := articleStore.Article{
-		Title: article.Title,
-		Date:  primitive.NewDateTimeFromTime(article.Date),
-		Body:  article.Body,
-		Tags:  article.Tags,
-	}
+	art := article.StoreArtical()
 	if _, err := art.Save(); err != nil {
 		return nil, err
 	}
+	return model.NewGqlArticle(art), nil
+}
 
-	return &model.Article{
-		ID:    art.ID.Hex(),
-		Title: art.Title,
-		Date:  art.Date.Time(),
-		Body:  art.Body,
-		Tags:  art.Tags,
-	}, nil
+func (r *mutationResolver) CreateArticles(ctx context.Context, articles []*model.NewArticle) (int, error) {
+	var arts []*store.Article = make([]*store.Article, len(articles))
+	for i, v := range articles {
+		arts[i] = v.StoreArtical()
+	}
+
+	count, err := store.InsertMany(ctx, arts)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *queryResolver) Article(ctx context.Context, id string) (*model.Article, error) {
 	log.Println("Article() find article by id ", id)
-	ctx, cencel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cencel()
-	art, err := articleStore.FindById(ctx, id)
+	art, err := store.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &model.Article{
-		ID:    art.ID.Hex(),
-		Title: art.Title,
-		Date:  art.Date.Time(),
-		Body:  art.Body,
-		Tags:  art.Tags,
-	}, nil
+	return model.NewGqlArticle(&art), nil
 }
 
 func (r *queryResolver) Articles(ctx context.Context) ([]*model.Article, error) {
-	ctx, cencel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cencel()
-
-	arts, err := articleStore.Find(ctx, &articleStore.Filter{})
+	arts, err := store.Find(ctx, &store.Filter{})
 	if err != nil {
 		return nil, err
 	}
 
 	var res []*model.Article
 	for _, art := range arts {
-		gqlArt := model.Article{
-			ID:    art.ID.Hex(),
-			Title: art.Title,
-			Date:  art.Date.Time(),
-			Body:  art.Body,
-			Tags:  art.Tags,
-		}
-		res = append(res, &gqlArt)
+		res = append(res, model.NewGqlArticle(&art))
 	}
 	log.Printf("Articles() found %d artitles", len(res))
 	return res, nil
@@ -80,7 +62,7 @@ func (r *queryResolver) ArticlesByTag(ctx context.Context, filter model.ArticleF
 	var default_limit int = 10
 
 	log.Println("ArticlesByTag() with filter ", filter)
-	artFilter := &articleStore.Filter{Tags: filter.Tag}
+	artFilter := &store.Filter{Tags: filter.Tag}
 	if filter.Date != nil {
 		artFilter.Date = primitive.NewDateTimeFromTime(*filter.Date)
 	}
@@ -91,9 +73,7 @@ func (r *queryResolver) ArticlesByTag(ctx context.Context, filter model.ArticleF
 	var res model.ArticlesByTag
 	res.Tag = filter.Tag
 
-	ctx, cencel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cencel()
-	arts, err := articleStore.FindRelatedTags(ctx, artFilter)
+	arts, err := store.FindRelatedTags(ctx, artFilter)
 	if err != nil {
 		return nil, err
 	}

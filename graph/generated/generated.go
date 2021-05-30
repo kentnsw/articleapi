@@ -60,7 +60,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateArticle func(childComplexity int, article model.NewArticle) int
+		CreateArticle  func(childComplexity int, article model.NewArticle) int
+		CreateArticles func(childComplexity int, articles []*model.NewArticle) int
 	}
 
 	Query struct {
@@ -72,6 +73,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateArticle(ctx context.Context, article model.NewArticle) (*model.Article, error)
+	CreateArticles(ctx context.Context, articles []*model.NewArticle) (int, error)
 }
 type QueryResolver interface {
 	Article(ctx context.Context, id string) (*model.Article, error)
@@ -168,6 +170,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateArticle(childComplexity, args["article"].(model.NewArticle)), true
+
+	case "Mutation.createArticles":
+		if e.complexity.Mutation.CreateArticles == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createArticles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateArticles(childComplexity, args["articles"].([]*model.NewArticle)), true
 
 	case "Query.article":
 		if e.complexity.Query.Article == nil {
@@ -280,6 +294,7 @@ type Query {
 
 type Mutation {
   createArticle(article: NewArticle!): Article!
+  createArticles(articles: [NewArticle!]!): Int!
 }
 
 type ArticlesByTag {
@@ -323,6 +338,21 @@ func (ec *executionContext) field_Mutation_createArticle_args(ctx context.Contex
 		}
 	}
 	args["article"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createArticles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.NewArticle
+	if tmp, ok := rawArgs["articles"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("articles"))
+		arg0, err = ec.unmarshalNNewArticle2ᚕᚖgithubᚗcomᚋkentnswᚋarticalᚑapiᚋgraphᚋmodelᚐNewArticleᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["articles"] = arg0
 	return args, nil
 }
 
@@ -764,6 +794,48 @@ func (ec *executionContext) _Mutation_createArticle(ctx context.Context, field g
 	res := resTmp.(*model.Article)
 	fc.Result = res
 	return ec.marshalNArticle2ᚖgithubᚗcomᚋkentnswᚋarticalᚑapiᚋgraphᚋmodelᚐArticle(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createArticles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createArticles_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateArticles(rctx, args["articles"].([]*model.NewArticle))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_article(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2237,6 +2309,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createArticles":
+			out.Values[i] = ec._Mutation_createArticles(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2695,6 +2772,32 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 func (ec *executionContext) unmarshalNNewArticle2githubᚗcomᚋkentnswᚋarticalᚑapiᚋgraphᚋmodelᚐNewArticle(ctx context.Context, v interface{}) (model.NewArticle, error) {
 	res, err := ec.unmarshalInputNewArticle(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewArticle2ᚕᚖgithubᚗcomᚋkentnswᚋarticalᚑapiᚋgraphᚋmodelᚐNewArticleᚄ(ctx context.Context, v interface{}) ([]*model.NewArticle, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*model.NewArticle, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNNewArticle2ᚖgithubᚗcomᚋkentnswᚋarticalᚑapiᚋgraphᚋmodelᚐNewArticle(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNNewArticle2ᚖgithubᚗcomᚋkentnswᚋarticalᚑapiᚋgraphᚋmodelᚐNewArticle(ctx context.Context, v interface{}) (*model.NewArticle, error) {
+	res, err := ec.unmarshalInputNewArticle(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
