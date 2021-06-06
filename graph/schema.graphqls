@@ -1,40 +1,16 @@
-type Article {
+type User {
   id: ID!
-  title: String!
-  date: Date!
-  body: String!
-  tags: [String!]!
+  name: String!
 }
 
-type Query {
-  article(id: String!): Article
-  articles: [Article!]!
-  articlesByTag(filter: ArticleFilter!): ArticlesByTag!
+extend type Query {
+  users: [User!]!
 }
 
-type Mutation {
-  createArticle(article: NewArticle!): Article!
-  createArticles(articles: [NewArticle!]!): Int!
+extend type Mutation {
+  createUser(user: NewUser!): User!
 }
 
-type ArticlesByTag {
-  tag: String!
-  count: Int!
-  articles: [String!]!
-  related_tags: [String!]!
+input NewUser {
+  name: String!
 }
-
-input ArticleFilter {
-  tag: String!
-  date: Date
-  limit: Int
-}
-
-input NewArticle {
-  title: String!
-  date: Date!
-  body: String!
-  tags: [String!]!
-}
-
-scalar Date

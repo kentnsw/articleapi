@@ -33,3 +33,12 @@ type NewArticle struct {
 	Body  string    `json:"body"`
 	Tags  []string  `json:"tags"`
 }
+
+type NewUser struct {
+	Name string `json:"name"`
+}
+
+type User struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}

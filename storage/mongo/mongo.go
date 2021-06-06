@@ -46,7 +46,7 @@ func Connect(uri string) *mongo.Client {
 
 func createIndex(ctx context.Context, collection *mongo.Collection, field string, unique bool, order int) {
 	mod := mongo.IndexModel{
-		Keys:    bson.M{field: order}, // index in ascending order or -1 for descending order
+		Keys:    bson.M{field: order}, // 1 for ascending order or -1 for descending order
 		Options: options.Index().SetUnique(unique),
 	}
 	_, err := collection.Indexes().CreateOne(ctx, mod)
